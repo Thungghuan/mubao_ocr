@@ -2,6 +2,7 @@ from configparser import ConfigParser
 import tempfile
 import werobot
 from werobot.replies import SuccessReply
+from werobot.utils import to_binary
 import requests
 from threading import Thread
 from paddleocr import PaddleOCR
@@ -15,9 +16,11 @@ token = config["werobot"]["token"]
 robot = werobot.WeRoBot(token)
 
 
-def ocr_image(image_url, session):
+def ocr_image(image_url, id):
     image = requests.get(image_url).content
     ocr = PaddleOCR(lang="ch", show_log=False)
+
+    session = robot.session_storage[id]
 
     text_content = ""
 
@@ -33,12 +36,15 @@ def ocr_image(image_url, session):
     else:
         session["content"].append(text_content)
 
-    print('operation success')
+    robot.session_storage[id] = session
+
+    print("operation success")
 
 
 @robot.image
 def img_handler(message, session):
-    Thread(target=ocr_image, args=(message.img, session)).start()
+    id = to_binary(message.source)
+    Thread(target=ocr_image, args=(message.img, id)).start()
     return SuccessReply()
 
 
