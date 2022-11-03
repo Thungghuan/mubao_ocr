@@ -53,7 +53,11 @@ def text_handler(_, session):
     if "content" not in session or len(session["content"]) == 0:
         return "图片还没有处理完成哦"
     else:
-        return "\n\n".join(session["content"])
+        result = []
+        for _ in len(session["content"]):
+            result.append(session["content"].pop(0))
+
+        return "\n\n".join(result)
 
 
 robot.config["HOST"] = config["werobot"]["host"]
