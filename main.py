@@ -5,8 +5,6 @@ config = ConfigParser()
 config.read("config.ini")
 
 token = config["werobot"]["token"]
-host = config["werobot"]["host"]
-port = config["werobot"]["port"]
 
 
 robot = werobot.WeRoBot(token)
@@ -17,4 +15,6 @@ def hello(message):
     return "Hello World!"
 
 
+robot.config["HOST"] = config["werobot"]["host"]
+robot.config["PORT"] = config["werobot"]["port"]
 robot.run()
