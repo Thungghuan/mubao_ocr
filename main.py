@@ -1,6 +1,7 @@
 from configparser import ConfigParser
 import tempfile
 import werobot
+from werobot.replies import SuccessReply
 import requests
 from paddleocr import PaddleOCR
 
@@ -13,7 +14,7 @@ token = config["werobot"]["token"]
 robot = werobot.WeRoBot(token)
 
 
-def ocr_image(image_url):
+async def ocr_image(image_url):
     image = requests.get(image_url).content
     ocr = PaddleOCR(lang="ch", show_log=False)
 
@@ -31,8 +32,9 @@ def ocr_image(image_url):
 
 # @robot.image 修饰的 Handler 只处理图片消息
 @robot.image
-def img(message):
-    return ocr_image(message.img)
+async def img(message):
+    await ocr_image(message.img)
+    return SuccessReply()
 
 
 robot.config["HOST"] = config["werobot"]["host"]
