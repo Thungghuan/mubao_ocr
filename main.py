@@ -1,12 +1,20 @@
+from configparser import ConfigParser
 import werobot
 
-robot = werobot.WeRoBot(token='tokenhere')
+config = ConfigParser()
+config.read("config.ini")
+
+token = config["werobot"]["token"]
+host = config["werobot"]["host"]
+port = config["werobot"]["port"]
+
+
+robot = werobot.WeRoBot(token)
+
 
 @robot.handler
 def hello(message):
-    return 'Hello World!'
+    return "Hello World!"
 
-# 让服务器监听在 0.0.0.0:80
-robot.config['HOST'] = '0.0.0.0'
-robot.config['PORT'] = 80
+
 robot.run()
