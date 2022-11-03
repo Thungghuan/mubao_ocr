@@ -15,25 +15,24 @@ robot = werobot.WeRoBot(token)
 
 def ocr_image(image_url):
     image = requests.get(image_url).content
-    ocr = PaddleOCR(lang="ch", det=False)
+    ocr = PaddleOCR(lang="ch", show_log=False)
 
     text_content = ""
 
     with tempfile.NamedTemporaryFile(mode="wb") as f:
         f.write(image)
-        result = ocr.ocr(f.name)
+        result = ocr.ocr(f.name, cls=False)[0]
 
-        for text in result:
-            text_content += text[0] + "\n"
+        for line in result:
+            text_content += line[-1][0] + "\n"
 
-    print(text_content)
+    return text_content
 
 
 # @robot.image 修饰的 Handler 只处理图片消息
 @robot.image
 def img(message):
-    ocr_image(message.img)
-    return message.img
+    return ocr_image(message.img)
 
 
 robot.config["HOST"] = config["werobot"]["host"]
