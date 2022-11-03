@@ -3,6 +3,7 @@ import tempfile
 import werobot
 from werobot.replies import SuccessReply
 import requests
+from threading import Thread
 from paddleocr import PaddleOCR
 
 config = ConfigParser()
@@ -14,7 +15,7 @@ token = config["werobot"]["token"]
 robot = werobot.WeRoBot(token)
 
 
-async def ocr_image(image_url):
+def ocr_image(image_url, session):
     image = requests.get(image_url).content
     ocr = PaddleOCR(lang="ch", show_log=False)
 
@@ -27,14 +28,26 @@ async def ocr_image(image_url):
         for line in result:
             text_content += line[-1][0] + "\n"
 
-    return text_content
+    if not session["content"]:
+        session["content"] = [text_content]
+    else:
+        session["content"].append(text_content)
+
+    print('operation success')
 
 
-# @robot.image 修饰的 Handler 只处理图片消息
 @robot.image
-async def img(message):
-    await ocr_image(message.img)
+def img_handler(message, session):
+    Thread(target=ocr_image, args=(message.img, session)).start()
     return SuccessReply()
+
+
+@robot.text
+def text_handler(_, session):
+    if not session["content"] or len(session["content"]) == 0:
+        return "图片还没有处理完成哦"
+    else:
+        return "\n\n".join(session["content"])
 
 
 robot.config["HOST"] = config["werobot"]["host"]
