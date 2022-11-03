@@ -15,7 +15,7 @@ robot = werobot.WeRoBot(token)
 
 def ocr_image(image_url):
     image = requests.get(image_url).content
-    ocr = PaddleOCR(lang="ch")
+    ocr = PaddleOCR(lang="ch", det=False)
 
     text_content = ""
 
@@ -23,10 +23,10 @@ def ocr_image(image_url):
         f.write(image)
         result = ocr.ocr(f.name)
 
-        for idx in range(len(result)):
-            res = result[idx]
-            for line in res:
-                print(line)
+        for text in result:
+            text_content += text[0] + "\n"
+
+    print(text_content)
 
 
 # @robot.image 修饰的 Handler 只处理图片消息
