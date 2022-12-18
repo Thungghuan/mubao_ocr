@@ -62,7 +62,7 @@ function imageOnChanged() {
     type="file"
     hidden
     ref="addButton"
-    accept="image/gif,image/jpeg,image/jpg,image/png,image/svg"
+    accept="image/png,image/gif,image/jpeg"
     @change="imageOnChanged"
   />
 </template>

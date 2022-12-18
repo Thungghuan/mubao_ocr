@@ -2,7 +2,8 @@ from flask import Flask, send_from_directory, request
 from flask_socketio import SocketIO, emit
 import base64
 from paddleocr import PaddleOCR
-import tempfile
+import time
+import os
 
 app = Flask("mubao_ocr")
 app.config["SECRET_KEY"] = "mubao_ocr"
@@ -10,16 +11,20 @@ socketio = SocketIO(app)
 
 
 def ocr(image):
+    image = base64.b64decode(image)
     ocr = PaddleOCR(lang="ch", show_log=False)
 
     text_content = ""
 
-    with tempfile.NamedTemporaryFile(mode="wb") as f:
-        f.write(image)
-        result = ocr.ocr(f.name, cls=False)[0]
+    filename = 'images/' + str(time.time())
+    f = open(filename,"wb")
+    f.write(image)
+    result = ocr.ocr(f.name, cls=False)[0]
+    f.close()
+    os.remove(filename)
 
-        for line in result:
-            text_content += line[-1][0] + "\n"
+    for line in result:
+        text_content += line[-1][0] + "\n"
 
     return text_content
 
@@ -45,7 +50,8 @@ def add_reg_image():
         image = base64.b64encode(request.files["image"].read())
         socketio.emit("regImage", image.decode("ascii"))
         result = ocr(image)
-        socketio.emit("regReuslt", {"content": result})
+        print(result)
+        socketio.emit("regResult", {"content": result})
 
     return "OK"
 

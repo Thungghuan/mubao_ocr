@@ -7,7 +7,7 @@ import { io } from 'socket.io-client'
 
 // PC端
 const regImagesPC = ref<string[]>([])
-const regReuslt = ref<string[]>([])
+const regResult = ref<string[]>([])
 const simImagesPC = ref<string[]>([])
 
 const socket = io(`ws://${location.host}`)
@@ -34,7 +34,9 @@ socket.on('connect', () => {
   })
 
   socket.on('regResult', ({ content }) => {
-    regReuslt.value.push(content)
+    console.log('receive result')
+    console.log(content)
+    regResult.value.push(content)
   })
 
   socket.emit('ping')
@@ -88,7 +90,7 @@ function copyResult(result: string) {
         v-for="(img, i) in regImagesPC"
         :key="i"
         :data="img"
-        :result="regReuslt[i] || ''"
+        :result="regResult[i] || ''"
         @del-image="delImage('regPC', i)"
         @copy-result="(result) => copyResult(result)"
       />
