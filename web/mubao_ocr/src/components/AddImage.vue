@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, toRef } from 'vue'
+import axios from 'axios'
 
 const props = defineProps<{
   text: string
-  url?: string
+  type: 'reg' | 'sim'
 }>()
 
 const emits = defineEmits<{
@@ -19,6 +20,20 @@ function addImage() {
 
 function imageOnChanged() {
   const imageFile = addButton.value!.files![0]
+  const data = new FormData()
+  data.set('image', imageFile)
+
+  axios({
+    url: `/image/${props.type}`,
+    method: 'post',
+    data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  }).then((res) => {
+    console.log(res)
+  })
+
   const reader = new FileReader()
   reader.onload = () => {
     emits('addImage', reader.result as string)

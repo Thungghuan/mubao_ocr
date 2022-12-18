@@ -3,11 +3,42 @@ import { ref } from 'vue'
 import RegImage from './components/RegImage.vue'
 import SimpleImage from './components/SimpleImage.vue'
 import AddImage from './components/AddImage.vue'
+import { io } from 'socket.io-client'
 
 // PC端
 const regImagesPC = ref<string[]>([])
 const regReuslt = ref<string[]>([])
 const simImagesPC = ref<string[]>([])
+
+const socket = io(`ws://${location.host}`)
+// client-side
+socket.on('connect', () => {
+  console.log(socket.id) // x8WIv7-mJelg7on_ALbx
+
+  socket.on('disconnect', () => {
+    console.log(socket.id) // undefined
+  })
+
+  socket.on('pong', () => {
+    console.log('connected')
+  })
+
+  socket.on('regImage', (image) => {
+    console.log('receive regImage')
+    regImagesPC.value.push('data:image/jpg;base64,' + image)
+  })
+
+  socket.on('simImage', (image) => {
+    console.log('receive simImage')
+    simImagesPC.value.push('data:image/jpg;base64,' + image)
+  })
+
+  socket.on('regResult', ({ content }) => {
+    regReuslt.value.push(content)
+  })
+
+  socket.emit('ping')
+})
 
 // 移动端
 const regImagesM = ref<string[]>([])
@@ -76,6 +107,7 @@ function copyResult(result: string) {
     <div h45vh flex="~ col" justify-evenly items-center>
       <AddImage
         :text="'需识别的图片'"
+        :type="'reg'"
         @add-image="(e) => addImageM('regM', e)"
       />
       <div my2 p3 w90vw h25vh b flex of-auto>
@@ -91,6 +123,7 @@ function copyResult(result: string) {
     <div h45vh flex="~ col" justify-evenly items-center of-hidden>
       <AddImage
         :text="'不需识别的图片'"
+        :type="'sim'"
         @add-image="(e) => addImageM('simM', e)"
       />
       <div my2 p3 w90vw h25vh b flex of-auto>
